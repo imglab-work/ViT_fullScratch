@@ -2,36 +2,22 @@ from ViT import ViT
 import torch
 import torch.optim as optim
 import torch.nn as nn
-from torchvision import datasets, transforms
-from torch.utils.data import DataLoader
-
-# 1. 前処理の定義
-# 画像をPyTorchが扱えるTensor形式に変換し、数値を正規化します
-transform = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize((0.5,), (0.5,)) # 平均0.5, 標準偏差0.5で正規化
-])
-
-# 2. MNISTデータセットのダウンロードと読み込み
-# 学習用データ
-train_dataset = datasets.MNIST(root='./data', train=True, download=True, transform=transform)
-# テスト用（評価用）データ
-test_dataset = datasets.MNIST(root='./data', train=False, download=True, transform=transform)
-
-# 3. DataLoader（バッチごとにデータを取り出す役職）の設定
-# batch_size=64なら、一度に64枚の画像をまとめてモデルに渡します
-train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
-
-print(f"学習データ数: {len(train_dataset)}枚")
 
 
+from MNISTDataLoader import MNISTDataLoader
+
+
+data_manager = MNISTDataLoader(batch_size=64)
+train_loader = data_manager.get_train()
+#test_loader = data_manager.get_test()
 
 # モデルのインスタンス化
+# 修正後のインスタンス化
 model = ViT(
-    image_size=224, 
-    patch_size=16, 
+    image_size=28,      # 224 から 28 へ変更
+    patch_size=7,       # 16 から 7 へ変更（28を割り切れる数にする）
     n_classes=10, 
+    channels=1,         # MNISTは白黒なので 1 を追加（クラス引数にある場合）
     dim=128, 
     depth=6, 
     n_heads=8, 
@@ -92,4 +78,6 @@ for epoch in range(epochs):
             print(f"[{epoch + 1}, {i + 1}] loss: {running_loss / 100:.3f}")
             running_loss = 0.0
 
-print("学習完了！")
+# モデルの重みを保存する
+torch.save(model.state_dict(), "vit_mnist_model.pth")
+print("モデルを保存しました：vit_mnist_model.pth")
