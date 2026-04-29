@@ -53,8 +53,6 @@ def predict():
     # Base64データをデコード
     image_data = base64.b64decode(data['image'].split(',')[1])
     tensor = transform_image(image_data)
-
-
     
     # 推論
     with torch.no_grad():

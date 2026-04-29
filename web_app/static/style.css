@@ -1,0 +1,117 @@
+/* static/css/style.css */
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #0a0a12;
+    background-image: 
+        radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0);
+    background-size: 40px 40px; /* サイバーなグリッド背景 */
+    color: #e0e0e0;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.container {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    max-width: 500px;
+    width: 90%;
+}
+
+h1 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    background: linear-gradient(90deg, #00f2fe, #4facfe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+p {
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 25px;
+}
+
+canvas {
+    border: 2px solid #4facfe;
+    background-color: #000;
+    cursor: crosshair;
+    box-shadow: 0 0 20px rgba(79, 172, 254, 0.4);
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+}
+
+canvas:hover {
+    transform: scale(1.02);
+}
+
+.controls {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+button {
+    padding: 12px 25px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 50px;
+    border: none;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.btn-clear {
+    background: transparent;
+    color: #ff4b2b;
+    border: 1px solid #ff4b2b;
+}
+
+.btn-clear:hover {
+    background: #ff4b2b;
+    color: white;
+    box-shadow: 0 0 15px rgba(255, 75, 43, 0.5);
+}
+
+.btn-predict {
+    background: linear-gradient(45deg, #00f2fe, #4facfe);
+    color: #000;
+}
+
+.btn-predict:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(79, 172, 254, 0.6);
+}
+
+#result-area {
+    margin-top: 30px;
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.result-label {
+    font-size: 0.8rem;
+    color: #888;
+    display: block;
+    margin-bottom: 5px;
+}
+
+#prediction {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}

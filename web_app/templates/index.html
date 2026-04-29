@@ -28,6 +28,7 @@
         button:hover { opacity: 0.8; }
         #result-area { margin-top: 30px; font-size: 24px; font-weight: bold; color: #333; }
     </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
@@ -43,7 +44,8 @@
     </div>
 
     <div id="result-area">
-        予測結果: <span id="prediction">-</span>
+        <span class="result-label">AI PREDICTION</span>
+        <div id="prediction">-</div>
     </div>
 </div>
 
