@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 
+
+#クラストークンの追加と位置エンコーディング
 class Embedding(nn.Module):
     def __init__(self, dim, n_patches):
         super().__init__()
@@ -10,7 +12,8 @@ class Embedding(nn.Module):
         # 2. 位置エンコーディング (学習可能なベクトル)
         # パッチ数 + クラストークン分 (n_patches + 1) 必要
         self.pos_embedding = nn.Parameter(torch.randn(1, n_patches + 1, dim))
-
+    #【入力】[B,N,dim]のテンソル(画像の特徴を含んでいる)
+    #【出力】[B,N+1,dim]のテンソル(先頭にクラストークンを追加+位置情報を加算)
     def forward(self, x):
         # x.shape: [B, N, dim]
         B, N, D = x.shape

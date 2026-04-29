@@ -17,7 +17,9 @@ class LinearProjection(nn.Module):
         std = 1.0 / math.sqrt(patch_dim)
         nn.init.uniform_(self.W, -std, std)
         nn.init.uniform_(self.b, -std, std)
-        
+    
+    #【入力】[B,N,D]のミニ画像(=パッチ)が並んだテンソル
+    #【出力】[B,N,dim]のテンソル(画像の特徴を含んでいる)
     #(B,N,patch_dim)×(patch_dim,dim)=(B,N,dim)
     def forward(self, x):
         # x.shape: [B, N, D]

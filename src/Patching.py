@@ -2,12 +2,13 @@ import torch
 import torch.nn as nn
 import numpy as np
 
-#画像とミニ画像に分割して横に並べる
+#画像をミニ画像に分割して横に並べる
 class Patching(nn.Module):
     def __init__(self, patch_size):
         super().__init__()
         self.p = patch_size
-
+    #【入力】[B,C,H,W]の複数枚画像のテンソル
+    #【出力】[B,N,D]のミニ画像(=パッチ)が並んだテンソル
     def forward(self, x):
         B, C, H, W = x.shape
         p = self.p

@@ -17,6 +17,8 @@ class TransformerEncoder(nn.Module):
                 MLP(dim, mlp_dim)                       # MLP
             ]))
 
+    #【入力】[B,N+1,dim]のテンソル(先頭にクラストークンを追加+位置情報を加算)
+    #【出力】[B,N+1,dim]のテンソル(MSAにより関連性を見る・MLPにより活性化関数を通す)
     def forward(self, x):
         for ln1, msa, ln2, mlp in self.layers:
             # 1. MSA ステップ (残差接続)
