@@ -3,6 +3,8 @@ import torch.nn as nn
 from Patching import Patching
 from LinearProjection import LinearProjection
 from Embedding import Embedding
+from TransformerEncoder import TransformerEncoder
+from MLPHead import MLPHead
 
 class ViT(nn.Module):
     def __init__(self, image_size, patch_size, n_classes, dim, depth, n_heads, channels = 3, mlp_dim = 256):
@@ -28,6 +30,7 @@ class ViT(nn.Module):
         self.patching = Patching(patch_size = patch_size)
         self.linear_projection_of_flattened_patches = LinearProjection(patch_dim = patch_dim, dim = dim)
         self.embedding = Embedding(dim = dim, n_patches = n_patches)
+
         self.transformer_encoder = TransformerEncoder(dim = dim, n_heads = n_heads, mlp_dim = mlp_dim, depth = depth)
         self.mlp_head = MLPHead(dim = dim, out_dim = n_classes)
 
