@@ -48,14 +48,18 @@ class ViTEvaluator:
         self.model.eval()
 
     def evaluate(self, test_loader, save_dir):
-        os.makedirs(save_dir, exist_ok=True)
-        mistakes_dir = os.path.join(save_dir, "mistakes")
+        # 成果物を入れるための「output」フォルダを作成
+        output_dir = os.path.join(save_dir, "output")
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # 間違い画像フォルダも output の中に作成
+        mistakes_dir = os.path.join(output_dir, "mistakes")
         os.makedirs(mistakes_dir, exist_ok=True)
 
         all_preds, all_labels = [], []
         mistake_count = 0
         max_save_mistakes = 10
-        attention_saved = False # 最初の1枚だけ保存するためのフラグ
+        attention_saved = False
 
         print("🚀 Evaluating...")
         with torch.no_grad():
@@ -67,35 +71,31 @@ class ViTEvaluator:
                 all_preds.extend(predicted.cpu().numpy())
                 all_labels.extend(labels.cpu().numpy())
 
-                # --- 1. 最初の1枚だけAttentionを記録 ---
+                # --- 1. 最初の1枚のAttentionを記録 (outputフォルダ直下) ---
                 if not attention_saved:
-                    # ファイル名を指定して保存
-                    attn_path = os.path.join(save_dir, "attention_sample.png")
+                    attn_path = os.path.join(output_dir, "attention_sample.png")
                     self.visualize_attention(images[0:1], attentions, attn_path)
                     attention_saved = True
 
-                # --- 2. 誤分類画像の保存 & その時のAttentionも保存 ---
+                # --- 2. 誤分類画像 & Attention (output/mistakesフォルダ内) ---
                 mask = (predicted != labels)
                 if mask.any() and mistake_count < max_save_mistakes:
-                    # 誤分類したサンプルのインデックスを取得
                     indices = torch.where(mask)[0]
                     for idx in indices:
                         if mistake_count >= max_save_mistakes: break
                         
-                        # 画像と予測・正解を抽出
                         img, p, t = images[idx:idx+1], predicted[idx].item(), labels[idx].item()
                         
-                        # 誤分類の証拠写真
                         img_path = os.path.join(mistakes_dir, f"mistake_{mistake_count}_P{p}_T{t}.png")
                         self._save_mistake_img(img[0], p, t, img_path)
                         
-                        # 【重要】その時のAttention Mapも並べて保存！
                         attn_mistake_path = os.path.join(mistakes_dir, f"mistake_{mistake_count}_attn.png")
                         self.visualize_attention(img, attentions, attn_mistake_path, idx=int(idx.item()))
                         
                         mistake_count += 1
 
-        self._report_metrics(all_labels, all_preds, save_dir)
+        # 混合行列などのレポートも output フォルダ内に出力
+        self._report_metrics(all_labels, all_preds, output_dir)
 
 
     def visualize_attention(self, img, attentions, save_path, idx=0):
@@ -172,35 +172,30 @@ def run_inference():
         print("❌ Error: File not found.")
         return
 
-    # 1. 評価用の新しいディレクトリを作成
     timestamp = time.strftime("%Y%m%d_%H%M_eval")
     new_save_dir = f"results/{timestamp}"
     os.makedirs(new_save_dir, exist_ok=True)
-    print(f"📂 New evaluation results will be saved in: {new_save_dir}")
-
-    # 2. 入力された重みとConfigを新しいフォルダにコピーして保存
-    # ファイル名が変わらないように os.path.basename を使います
+    
+    # 1. 重みとConfigは new_save_dir 直下に保存
     shutil.copy(model_path, os.path.join(new_save_dir, os.path.basename(model_path)))
-    # configは常に「config_backup.py」という名前に統一して保存すると後で扱いやすいです
     new_conf_path = os.path.join(new_save_dir, "config_backup.py")
     shutil.copy(config_path, new_conf_path)
-    print(f"📄 Copied weights and config to the new folder.")
+    print(f"📄 Copied files to: {new_save_dir}")
 
-    # 3. 評価クラスのインスタンス化（コピーした方のConfigを使う）
+    # 2. インスタンス化と評価実行 (save_dir を渡す)
     try:
         evaluator = ViTEvaluator(model_path=model_path, conf_path=new_conf_path)
     except Exception as e:
-        print(f"❌ Failed to initialize evaluator: {e}")
+        print(f"❌ Initialization error: {e}")
         return
 
-    # 4. データのロード
     data_manager = MNISTDataLoader(batch_size=64) 
     test_loader = data_manager.get_test()
 
-    # 5. 評価実行
+    # 評価開始（この中で output フォルダが作られる）
     evaluator.evaluate(test_loader, save_dir=new_save_dir)
     
-    print(f"✨ Evaluation complete! Check the results in {new_save_dir}")
+    print(f"✨ Evaluation complete! Check images in {new_save_dir}/output/")
 
 if __name__ == "__main__":
     run_inference()
