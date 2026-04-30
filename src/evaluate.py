@@ -144,10 +144,9 @@ class ViTEvaluator:
 
     def _report_metrics(self, labels, preds, confs, output_dir):
         labels, preds, confs = np.array(labels), np.array(preds), np.array(confs)
-        
         accuracy = (labels == preds).mean() * 100
         
-        # 1. 確信度の統計計算
+        # 1. 確信度の統計計算 (0.0〜1.0 の範囲を想定)
         correct_mask = (labels == preds)
         mistake_mask = ~correct_mask
         
@@ -155,39 +154,39 @@ class ViTEvaluator:
         avg_conf_correct = confs[correct_mask].mean() if any(correct_mask) else 0
         avg_conf_mistake = confs[mistake_mask].mean() if any(mistake_mask) else 0
 
-        # 2. 数字ごとの確信度
-        class_conf = {}
-        for i in range(10):
-            mask = (labels == i)
-            class_conf[i] = confs[mask].mean() if any(mask) else 0
-
-        # 3. レポートの作成と保存
-        report = classification_report(
-            labels, preds, 
-            target_names=[f"Digit {i}" for i in range(10)],
-            digits=4
-        )
+        # 2. classification_reportを辞書形式で取得してMarkdown化
+        report_dict = classification_report(labels, preds, output_dict=True)
 
         report_path = os.path.join(output_dir, "classification_report.txt")
         with open(report_path, "w", encoding="utf-8") as f:
-            f.write(f"--- ViT MNIST Evaluation Report ---\n")
-            f.write(f"Date: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
-            f.write(f"Overall Accuracy: {accuracy:.2f}%\n\n")
+            f.write(f"# ViT MNIST Evaluation Report\n\n")
+            f.write(f"- **Date**: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(f"- **Overall Accuracy**: `{accuracy:.2f}%` \n\n")
             
-            f.write(f"--- Confidence Analysis ---\n")
-            f.write(f"Average Confidence (Total):   {avg_conf_total:.4f}\n")
-            f.write(f"Average Confidence (Correct): {avg_conf_correct:.4f}\n")
-            f.write(f"Average Confidence (Mistake): {avg_conf_mistake:.4f}\n\n")
+            f.write(f"## 📊 Confidence Analysis\n\n")
+            f.write(f"| Category | Average Confidence |\n")
+            f.write(f"| :--- | :--- |\n")
+            f.write(f"| **Total** | {avg_conf_total:.4f} |\n")
+            f.write(f"| ✅ **Correct** | {avg_conf_correct:.4f} |\n")
+            f.write(f"| ❌ **Mistake** | {avg_conf_mistake:.4f} |\n\n")
             
-            f.write(f"--- Confidence per Class ---\n")
+            f.write(f"## 📈 Metrics per Class\n\n")
+            f.write(f"| Class | Precision | Recall | F1-score | Avg Conf |\n")
+            f.write(f"| :--- | :--- | :--- | :--- | :--- |\n")
             for i in range(10):
-                f.write(f"Digit {i}: {class_conf[i]:.4f}\n")
-            f.write("\n")
+                label = str(i)
+                m = report_dict[label]
+                # そのクラスだけの平均確信度を計算
+                c_conf = confs[labels == i].mean() if any(labels == i) else 0
+                f.write(f"| Digit {i} | {m['precision']:.4f} | {m['recall']:.4f} | {m['f1-score']:.4f} | {c_conf:.4f} |\n")
             
-            f.write(f"--- Classification Report ---\n")
-            f.write(str(report))
+            f.write(f"\n## 🏁 Summary\n\n")
+            f.write(f"| Type | Precision | Recall | F1-score |\n")
+            f.write(f"| :--- | :--- | :--- | :--- |\n")
+            f.write(f"| Macro Avg | {report_dict['macro avg']['precision']:.4f} | {report_dict['macro avg']['recall']:.4f} | {report_dict['macro avg']['f1-score']:.4f} |\n")
+            f.write(f"| Weighted Avg | {report_dict['weighted avg']['precision']:.4f} | {report_dict['weighted avg']['recall']:.4f} | {report_dict['weighted avg']['f1-score']:.4f} |\n")
         
-        print(f"📝 Saved Comprehensive Report: {report_path}")
+        print(f"📝 Markdown report saved: {report_path}")
 
         # 4. 混合行列の作成 (既存の処理)
         cm = confusion_matrix(labels, preds)
