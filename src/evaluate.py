@@ -2,7 +2,7 @@ import torch
 import matplotlib.pyplot as plt
 import os
 from ViT import ViT
-from MNISTDataLoader import MNISTDataLoader
+from models.MNISTDataLoader import MNISTDataLoader
 
 def run_inference():
     # 1. 各種設定

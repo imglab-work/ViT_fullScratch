@@ -4,7 +4,7 @@ import torch.optim as optim
 import torch.nn as nn
 
 
-from MNISTDataLoader import MNISTDataLoader
+from models.MNISTDataLoader import MNISTDataLoader
 
 
 data_manager = MNISTDataLoader(batch_size=64)
