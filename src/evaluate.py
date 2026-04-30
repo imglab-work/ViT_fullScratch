@@ -184,7 +184,7 @@ class ViTEvaluator:
         cm = confusion_matrix(labels, preds)
         plt.figure(figsize=(10, 8))
         sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False,
-                    xticklabels=range(10), yticklabels=range(10))
+                    xticklabels=[str(i) for i in range(10)], yticklabels=[str(i) for i in range(10)])
         plt.xlabel("Predicted Label")
         plt.ylabel("True Label")
         plt.title(f"Confusion Matrix (Acc: {accuracy:.2f}%)")

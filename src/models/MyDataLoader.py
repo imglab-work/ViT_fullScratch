@@ -17,7 +17,7 @@ class MNISTDataLoader:
             train = datasets.FashionMNIST(root=root, train=True, download=True, transform=self.transform)
             test = datasets.FashionMNIST(root=root, train=False, download=True, transform=self.transform)
         else:
-            print("エラー")
+            raise ValueError(f"Unknown dataset: {dataset}")
         self.train_dataset = train
         self.test_dataset = test
         
