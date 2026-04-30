@@ -26,6 +26,7 @@ class Embedding(nn.Module):
 
         # 位置エンコーディングを足す
         # (B, N+1, dim) + (1, N+1, dim) -> Broadcastingで各バッチに足される
+        #位置情報は特徴ベクトルにそのまま足される
         x = x + self.pos_embedding
 
         return x

@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
-from MLP import MLP
 from MSA import MSA
+from MLP import MLP
 class TransformerEncoder(nn.Module):
     def __init__(self, dim, n_heads, mlp_dim, depth):
         super().__init__()

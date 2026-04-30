@@ -61,7 +61,7 @@ class ViT(nn.Module):
 
         # 5. 出力の0番目のベクトルを MLP Head で処理
         # x.shape : [batch_size, n_patches + 1, dim] -> [batch_size, dim] -> [batch_size, n_classes]
-        x = x[:, 0]
+        x = x[:, 0, :]#一応最後の「:」は省略可能
         x = self.mlp_head(x)
 
         return x

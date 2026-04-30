@@ -8,7 +8,7 @@ class Patching(nn.Module):
         super().__init__()
         self.p = patch_size
     #【入力】[B,C,H,W]の複数枚画像のテンソル
-    #【出力】[B,N,D]のミニ画像(=パッチ)が並んだテンソル
+    #【出力】[B,N,D]の、ミニ画像ベクトル(=パッチ)が並んだテンソル
     def forward(self, x):
         B, C, H, W = x.shape
         p = self.p
