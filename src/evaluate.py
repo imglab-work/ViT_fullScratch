@@ -87,10 +87,10 @@ class ViTEvaluator:
                         img, p, t = images[idx:idx+1], predicted[idx].item(), labels[idx].item()
                         
                         img_path = os.path.join(mistakes_dir, f"mistake_{mistake_count}_P{p}_T{t}.png")
-                        self._save_mistake_img(img[0], p, t, img_path)
+                        #self._save_mistake_img(img[0], p, t, img_path)
                         
                         attn_mistake_path = os.path.join(mistakes_dir, f"mistake_{mistake_count}_attn.png")
-                        self.visualize_attention(img, attentions, attn_mistake_path, idx=int(idx.item()))
+                        #self.visualize_attention(img, attentions, attn_mistake_path, idx=int(idx.item()))
                         
                         mistake_count += 1
 
