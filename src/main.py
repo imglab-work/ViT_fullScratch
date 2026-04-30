@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import os
 import time
 from ViT import ViT
-from models.MNISTDataLoader import MNISTDataLoader
+from models.MyDataLoader import MNISTDataLoader
 # 前回の評価クラスを再利用（別ファイルに保存している前提、もしくは同ファイル内に定義）
 from evaluate import ViTEvaluator
 import shutil 
@@ -26,7 +26,7 @@ def train_and_evaluate():
     print(f"📂 Results will be saved in: {save_dir}")
 
     # --- 2. モデル・データ準備 ---
-    data_manager = MNISTDataLoader(batch_size=BATCH_SIZE)
+    data_manager = MNISTDataLoader(batch_size=BATCH_SIZE, dataset=Config.DATASET)
     train_loader = data_manager.get_train()
     test_loader = data_manager.get_test()
 

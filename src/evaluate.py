@@ -66,7 +66,8 @@ class ViTEvaluator:
             for images, labels in test_loader:
                 images, labels = images.to(self.device), labels.to(self.device)
                 outputs, attentions = self.model(images)
-                conf, predicted = torch.max(outputs, 1)
+                probs = torch.softmax(outputs, dim=1)
+                conf, predicted = torch.max(probs, 1)
 
                 all_preds.extend(predicted.cpu().numpy())
                 all_labels.extend(labels.cpu().numpy())
