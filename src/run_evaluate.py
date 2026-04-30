@@ -2,10 +2,9 @@ import time
 import shutil
 import glob
 import os
-import importlib.util
-import sys
 from models.MyDataLoader import MNISTDataLoader
 from evaluate import ViTEvaluator
+from utils.config_loader import load_config_class
 def run_inference():
     print("\n" + "="*30)
     print("🚀 ViT Evaluation Mode")
@@ -35,11 +34,7 @@ def run_inference():
     print(f"🔍 Found Config: {os.path.basename(config_path)}")
 
     #conf_path から Config クラスを動的にロードする
-    spec = importlib.util.spec_from_file_location("config_module", config_path)
-    config_module = importlib.util.module_from_spec(spec)
-    sys.modules["config_module"] = config_module
-    spec.loader.exec_module(config_module)
-    loaded_config = config_module.Config
+    Config = load_config_class(config_path)
 
     # --- 2. 出力モードの選択 ---
     print("\nSelect Output Mode:")
@@ -65,7 +60,7 @@ def run_inference():
     # --- 3. 評価実行 ---
     try:
         evaluator = ViTEvaluator(model_path=model_path, conf_path=new_conf_path)
-        data_manager = MNISTDataLoader(batch_size=64, dataset=loaded_config.DATASET) 
+        data_manager = MNISTDataLoader(batch_size=64, dataset=Config.DATASET) 
         test_loader = data_manager.get_test()
         
         evaluator.evaluate(test_loader, save_dir=save_dir)

@@ -6,34 +6,25 @@ import numpy as np
 from sklearn.metrics import confusion_matrix, classification_report
 from ViT import ViT
 import time
-
-import importlib.util
-import sys
-
+from typing import Any, cast
+from utils.config_loader import load_config_class
 
 class ViTEvaluator:
     def __init__(self, model_path, conf_path):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         # 1. conf_path から Config クラスを動的にロードする
-        spec = importlib.util.spec_from_file_location("config_module", conf_path)
-        config_module = importlib.util.module_from_spec(spec)
-        sys.modules["config_module"] = config_module
-        spec.loader.exec_module(config_module)
-        
-        # ロードしたモジュールから Config クラスを取得
-        loaded_config = config_module.Config
-
+        Config = load_config_class(conf_path)
         # 2. ロードした設定（loaded_config）を使ってモデルをインスタンス化
         self.model = ViT(
-            image_size=loaded_config.IMAGE_SIZE,
-            patch_size=loaded_config.PATCH_SIZE,
-            n_classes=loaded_config.N_CLASSES,
-            channels=loaded_config.CHANNELS,
-            dim=loaded_config.DIM,
-            depth=loaded_config.DEPTH,
-            n_heads=loaded_config.N_HEADS,
-            mlp_dim=loaded_config.MLP_DIM
+            image_size=Config.IMAGE_SIZE,
+            patch_size=Config.PATCH_SIZE,
+            n_classes=Config.N_CLASSES,
+            channels=Config.CHANNELS,
+            dim=Config.DIM,
+            depth=Config.DEPTH,
+            n_heads=Config.N_HEADS,
+            mlp_dim=Config.MLP_DIM
         ).to(self.device)
         
         # 重みのロード
@@ -157,10 +148,10 @@ class ViTEvaluator:
 
         # 2. classification_reportを辞書形式で取得してMarkdown化
         report_dict = classification_report(labels, preds, output_dict=True)
+        report_dict = cast(dict[str, Any], classification_report(labels, preds, output_dict=True))
 
         report_path = os.path.join(output_dir, "classification_report.txt")
         with open(report_path, "w", encoding="utf-8") as f:
-            f.write(f"# ViT MNIST Evaluation Report\n\n")
             f.write(f"- **Date**: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
             f.write(f"- **Overall Accuracy**: `{accuracy:.2f}%` \n\n")
             
