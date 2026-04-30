@@ -5,9 +5,10 @@ from models.LinearProjection import LinearProjection
 from models.Embedding import Embedding
 from models.TransformerEncoder import TransformerEncoder
 from models.MLPHead import MLPHead
+from config import Config
 
 class ViT(nn.Module):
-    def __init__(self, image_size, patch_size, n_classes, dim, depth, n_heads, channels = 3, mlp_dim = 256):
+    def __init__(self, image_size, patch_size, n_classes, dim, depth, n_heads, channels, mlp_dim):
         """ [input]
             - image_size (int) : 画像の縦の長さ（= 横の長さ）
             - patch_size (int) : パッチの縦の長さ（= 横の長さ）
@@ -57,11 +58,11 @@ class ViT(nn.Module):
 
         # 4. Transformer Encoder
         # x.shape : No Change
-        x = self.transformer_encoder(x)
+        x, attentions = self.transformer_encoder(x)
 
         # 5. 出力の0番目のベクトルを MLP Head で処理
         # x.shape : [batch_size, n_patches + 1, dim] -> [batch_size, dim] -> [batch_size, n_classes]
         x = x[:, 0, :]#一応最後の「:」は省略可能
         x = self.mlp_head(x)
 
-        return x
+        return x, attentions

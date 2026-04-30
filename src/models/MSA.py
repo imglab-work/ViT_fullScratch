@@ -57,7 +57,7 @@ class MSA(nn.Module):
         # 最後の線形変換: [B, N, D] @ [D, D] + [D] = [B, N, D]
         out = out @ self.w_out + self.b_out
         
-        return out
+        return out, attn
 
 """
 class MSA(nn.Module):
