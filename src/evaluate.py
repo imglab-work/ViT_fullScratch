@@ -56,6 +56,7 @@ class ViTEvaluator:
         #os.makedirs(mistakes_dir, exist_ok=True)
 
         all_preds, all_labels = [], []
+        all_confidences = []
         mistake_count = 0
         max_save_mistakes = 10
         attention_saved = False
@@ -65,10 +66,11 @@ class ViTEvaluator:
             for images, labels in test_loader:
                 images, labels = images.to(self.device), labels.to(self.device)
                 outputs, attentions = self.model(images)
-                _, predicted = torch.max(outputs, 1)
+                conf, predicted = torch.max(outputs, 1)
 
                 all_preds.extend(predicted.cpu().numpy())
                 all_labels.extend(labels.cpu().numpy())
+                all_confidences.extend(conf.cpu().numpy())
 
                 # --- 1. 最初の1枚のAttentionを記録 (outputフォルダ直下) ---
                 if not attention_saved:
@@ -94,7 +96,7 @@ class ViTEvaluator:
                         mistake_count += 1
 
         # 混合行列などのレポートも output フォルダ内に出力
-        self._report_metrics(all_labels, all_preds, output_dir)
+        self._report_metrics(all_labels, all_preds, all_confidences, output_dir)
 
 
     def visualize_attention(self, img, attentions, save_path, idx=0):
@@ -140,32 +142,52 @@ class ViTEvaluator:
             plt.savefig(save_path)
             plt.close()
 
-    def _report_metrics(self, labels, preds, output_dir):
-        labels, preds = np.array(labels), np.array(preds)
+    def _report_metrics(self, labels, preds, confs, output_dir):
+        labels, preds, confs = np.array(labels), np.array(preds), np.array(confs)
         
-        # 1. 基本的な正答率の表示
         accuracy = (labels == preds).mean() * 100
-        print("-" * 30)
-        print(f"📊 Final Accuracy: {accuracy:.2f}%")
+        
+        # 1. 確信度の統計計算
+        correct_mask = (labels == preds)
+        mistake_mask = ~correct_mask
+        
+        avg_conf_total = confs.mean()
+        avg_conf_correct = confs[correct_mask].mean() if any(correct_mask) else 0
+        avg_conf_mistake = confs[mistake_mask].mean() if any(mistake_mask) else 0
 
-        # 2. 詳細なレポート (Precision, Recall, F1-score) の生成
-        # target_names は 0〜9 の数字を指定
+        # 2. 数字ごとの確信度
+        class_conf = {}
+        for i in range(10):
+            mask = (labels == i)
+            class_conf[i] = confs[mask].mean() if any(mask) else 0
+
+        # 3. レポートの作成と保存
         report = classification_report(
-            labels, 
-            preds, 
+            labels, preds, 
             target_names=[f"Digit {i}" for i in range(10)],
-            digits=4 # 小数点第4位まで表示（研究用にはこれくらいあると嬉しい）
+            digits=4
         )
 
-        # 3. テキストファイルとして保存
         report_path = os.path.join(output_dir, "classification_report.txt")
         with open(report_path, "w", encoding="utf-8") as f:
             f.write(f"--- ViT MNIST Evaluation Report ---\n")
             f.write(f"Date: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
             f.write(f"Overall Accuracy: {accuracy:.2f}%\n\n")
+            
+            f.write(f"--- Confidence Analysis ---\n")
+            f.write(f"Average Confidence (Total):   {avg_conf_total:.4f}\n")
+            f.write(f"Average Confidence (Correct): {avg_conf_correct:.4f}\n")
+            f.write(f"Average Confidence (Mistake): {avg_conf_mistake:.4f}\n\n")
+            
+            f.write(f"--- Confidence per Class ---\n")
+            for i in range(10):
+                f.write(f"Digit {i}: {class_conf[i]:.4f}\n")
+            f.write("\n")
+            
+            f.write(f"--- Classification Report ---\n")
             f.write(str(report))
         
-        print(f"📝 Saved Detailed Report: {report_path}")
+        print(f"📝 Saved Comprehensive Report: {report_path}")
 
         # 4. 混合行列の作成 (既存の処理)
         cm = confusion_matrix(labels, preds)
