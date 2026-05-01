@@ -3,6 +3,8 @@ import torch.nn as nn
 import math
 import numpy as np
 
+from config import Config
+
 #抽象的なベクトルに変換する
 #全結合層であるが、CNNの全結合とは違い前半で使う。
 #(CNNの全結合)畳み込み層で特徴を抽出しきった最後（出口）に、抽出した特徴から最終的な分類を行う
@@ -21,6 +23,8 @@ class LinearProjection(nn.Module):
         std = 1.0 / math.sqrt(patch_dim)
         nn.init.uniform_(self.W, -std, std)
         nn.init.uniform_(self.b, -std, std)
+
+        self.patch_shuffle = Config.PATCH_SHUFFLE
     
     #【入力】[B,N,D]のミニ画像ベクトル(=パッチ)が並んだテンソル
     #【出力】[B,N,dim]のテンソル(画像の特徴を含んでいる)
@@ -30,4 +34,10 @@ class LinearProjection(nn.Module):
         # x.shape: [B, N, D]
         x = x @ self.W + self.b
         # x.shape: [batch_size, n_patches, dim]
+        
+        if self.patch_shuffle:
+            b, n, _ = x.shape
+            for i in range(b):
+                indices = torch.randperm(n)
+                x[i] = x[i, indices, :]
         return x

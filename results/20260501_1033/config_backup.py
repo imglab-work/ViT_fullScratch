@@ -15,7 +15,7 @@ class Config:
     # --- モデル（ViT）の構造設定 ---
     #IMAGE_SIZEはPATCH_SIZEで割り切れる必要がある
     IMAGE_SIZE = 28
-    PATCH_SIZE = 14
+    PATCH_SIZE = 7
     CHANNELS = 1
     
     DIM = 128
