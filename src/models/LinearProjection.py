@@ -35,6 +35,8 @@ class LinearProjection(nn.Module):
         x = x @ self.W + self.b
         # x.shape: [batch_size, n_patches, dim]
         
+        #ベクトルをシャッフルするか？
+        #結論：しない方がいい
         if self.patch_shuffle:
             b, n, _ = x.shape
             for i in range(b):
