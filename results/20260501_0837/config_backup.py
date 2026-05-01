@@ -3,13 +3,7 @@ class Config:
     BATCH_SIZE = 64
     EPOCHS = 5
     LR = 1e-4
-
-    # --- データセット設定 ---
     DATASET = "FashionMNIST"
-    CLASS_NAMES = [
-        'T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat', 
-        'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot'
-    ]
 
     # --- モデル（ViT）の構造設定 ---
     #IMAGE_SIZEはPATCH_SIZEで割り切れる必要がある
