@@ -9,21 +9,26 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 from ViT import ViT
+from utils.config_loader import load_config_class
 
 app = Flask(__name__)
 
+date = "20260501_0718"
+conf_path = f"results/{date}/config_backup.py"
+Config = load_config_class(conf_path)
 # --- ViTモデルの準備 ---
 model = ViT(
-    image_size=28,
-    patch_size=7,
-    n_classes=10, 
-    channels=1,
-    dim=128, 
-    depth=6, 
-    n_heads=8, 
-    mlp_dim=256
+    image_size=Config.IMAGE_SIZE,
+    patch_size=Config.PATCH_SIZE,
+    n_classes=Config.N_CLASSES,
+    channels=Config.CHANNELS,
+    dim=Config.DIM,
+    depth=Config.DEPTH,
+    n_heads=Config.N_HEADS,
+    mlp_dim=Config.MLP_DIM
 )
-model.load_state_dict(torch.load('vit_mnist_model.pth'))
+
+model.load_state_dict(torch.load(f'results/{date}/vit_mnist_model.pth'))
 model.eval()
 
 def transform_image(image_bytes):
@@ -56,7 +61,7 @@ def predict():
     
     # 推論
     with torch.no_grad():
-        outputs = model(tensor)
+        outputs, attentions = model(tensor)
         _, predicted = torch.max(outputs, 1)
         prediction = predicted.item()
 
