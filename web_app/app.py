@@ -67,5 +67,10 @@ def predict():
 
     return jsonify({'prediction': prediction})
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# if __name__ == '__main__':
+#     app.run(debug=True)
+
+if __name__ == "__main__":
+    # Renderなどのクラウド環境では PORT 環境変数を参照する必要がある
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
